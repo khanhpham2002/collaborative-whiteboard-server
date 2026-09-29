@@ -35,15 +35,16 @@ public class DrawingStorageService {
         entity.setLineWidth(message.getLineWidth());
         entity.setSenderId(message.getSenderId());
         entity.setType(message.getType());
+        entity.setRoomId(message.getRoomId());
         
         repository.save(entity);
     }
 
     /**
-     * Trả về toàn bộ nét vẽ đã lưu
+     * Trả về toàn bộ nét vẽ đã lưu của một phòng
      */
-    public List<DrawMessage> getAllDrawings() {
-        return repository.findAll().stream().map(entity -> {
+    public List<DrawMessage> getAllDrawings(String roomId) {
+        return repository.findByRoomId(roomId).stream().map(entity -> {
             DrawMessage msg = new DrawMessage();
             msg.setStrokeId(entity.getStrokeId());
             msg.setPrevX(entity.getPrevX());
@@ -54,27 +55,29 @@ public class DrawingStorageService {
             msg.setLineWidth(entity.getLineWidth());
             msg.setSenderId(entity.getSenderId());
             msg.setType(entity.getType());
+            msg.setRoomId(entity.getRoomId());
             return msg;
         }).collect(Collectors.toList());
     }
 
     /**
-     * Xóa toàn bộ nét vẽ
+     * Xóa toàn bộ nét vẽ của một phòng
      */
-    public void clearAll() {
-        repository.deleteAll();
+    @Transactional
+    public void clearRoom(String roomId) {
+        repository.deleteByRoomId(roomId);
     }
 
     /**
-     * Undo: Tìm nét vẽ cuối cùng của người dùng và xóa nó.
+     * Undo: Tìm nét vẽ cuối cùng của người dùng trong phòng và xóa nó.
      * @return strokeId vừa bị xóa, hoặc null nếu không tìm thấy
      */
     @Transactional
-    public String undoLastStroke(String senderId) {
-        DrawMessageEntity lastStroke = repository.findFirstBySenderIdOrderByIdDesc(senderId);
+    public String undoLastStroke(String senderId, String roomId) {
+        DrawMessageEntity lastStroke = repository.findFirstBySenderIdAndRoomIdOrderByIdDesc(senderId, roomId);
         if (lastStroke != null && lastStroke.getStrokeId() != null) {
             String strokeId = lastStroke.getStrokeId();
-            repository.deleteByStrokeId(strokeId);
+            repository.deleteByStrokeIdAndRoomId(strokeId, roomId);
             return strokeId;
         }
         return null;

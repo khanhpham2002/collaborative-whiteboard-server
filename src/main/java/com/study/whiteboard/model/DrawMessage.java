@@ -11,11 +11,12 @@ public class DrawMessage {
     private String senderId;
     private String strokeId;
     private String type; // pen, line, rect, circle
+    private String roomId;
 
     public DrawMessage() {
     }
 
-    public DrawMessage(double prevX, double prevY, double currX, double currY, String color, double lineWidth, String senderId, String strokeId, String type) {
+    public DrawMessage(double prevX, double prevY, double currX, double currY, String color, double lineWidth, String senderId, String strokeId, String type, String roomId) {
         this.prevX = prevX;
         this.prevY = prevY;
         this.currX = currX;
@@ -25,6 +26,7 @@ public class DrawMessage {
         this.senderId = senderId;
         this.strokeId = strokeId;
         this.type = type;
+        this.roomId = roomId;
     }
 
     public double getPrevX() {
@@ -97,5 +99,13 @@ public class DrawMessage {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 }

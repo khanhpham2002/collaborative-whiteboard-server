@@ -19,6 +19,7 @@ public class DrawMessageEntity {
     private double lineWidth;
     private String senderId;
     private String type;
+    private String roomId;
 
     public DrawMessageEntity() {
     }
@@ -101,5 +102,13 @@ public class DrawMessageEntity {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 }

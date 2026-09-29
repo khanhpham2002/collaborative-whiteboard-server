@@ -4,10 +4,12 @@ import com.study.whiteboard.model.DrawMessage;
 import com.study.whiteboard.service.DrawingStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -18,60 +20,56 @@ public class WhiteboardController {
 
     private static final Logger log = LoggerFactory.getLogger(WhiteboardController.class);
     private final DrawingStorageService storageService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public WhiteboardController(DrawingStorageService storageService) {
+    public WhiteboardController(DrawingStorageService storageService, SimpMessagingTemplate messagingTemplate) {
         this.storageService = storageService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     /**
-     * Nhận tọa độ vẽ từ một người dùng tại '/app/draw'
-     * và lập tức phát thanh (Broadcast) đến tất cả những ai đang subscribe '/topic/draw'
+     * Nhận tọa độ vẽ từ một người dùng trong một phòng
      */
-    @MessageMapping("/draw")
-    @SendTo("/topic/draw")
-    public DrawMessage broadcastDrawing(DrawMessage message) {
+    @MessageMapping("/room/{roomId}/draw")
+    public void broadcastDrawing(@DestinationVariable String roomId, DrawMessage message) {
+        message.setRoomId(roomId);
         storageService.addDrawing(message);
-        return message;
+        messagingTemplate.convertAndSend("/topic/room/" + roomId + "/draw", message);
     }
 
     /**
-     * Nhận yêu cầu xóa trắng bảng vẽ tại '/app/clear'
-     * và phát thanh đến '/topic/clear' để tất cả các màn hình tự xóa sạch
+     * Nhận yêu cầu xóa trắng bảng vẽ của một phòng
      */
-    @MessageMapping("/clear")
-    @SendTo("/topic/clear")
-    public Map<String, String> broadcastClear(Map<String, String> payload) {
-        log.info("Nhận yêu cầu xóa trắng bảng từ user: {}", payload.get("senderId"));
-        storageService.clearAll();
-        return payload;
+    @MessageMapping("/room/{roomId}/clear")
+    public void broadcastClear(@DestinationVariable String roomId, Map<String, String> payload) {
+        log.info("Nhận yêu cầu xóa bảng từ user: {} tại phòng: {}", payload.get("senderId"), roomId);
+        storageService.clearRoom(roomId);
+        messagingTemplate.convertAndSend("/topic/room/" + roomId + "/clear", payload);
     }
 
     /**
-     * Nhận yêu cầu Undo tại '/app/undo'
-     * Xóa nét vẽ cuối cùng của user đó trong DB, và phát thanh ID của nét vẽ đó
-     * để các client tự xóa nó khỏi màn hình.
+     * Nhận yêu cầu Undo của một người dùng trong phòng
      */
-    @MessageMapping("/undo")
-    @SendTo("/topic/undo")
-    public Map<String, String> broadcastUndo(Map<String, String> payload) {
+    @MessageMapping("/room/{roomId}/undo")
+    public void broadcastUndo(@DestinationVariable String roomId, Map<String, String> payload) {
         String senderId = payload.get("senderId");
-        log.info("Nhận yêu cầu Undo từ user: {}", senderId);
+        log.info("Nhận yêu cầu Undo từ user: {} tại phòng: {}", senderId, roomId);
         
-        String undoneStrokeId = storageService.undoLastStroke(senderId);
+        String undoneStrokeId = storageService.undoLastStroke(senderId, roomId);
         
-        // Trả về strokeId vừa xóa để các client biết mà xóa khỏi canvas
-        return Map.of(
+        Map<String, String> response = Map.of(
             "senderId", senderId,
             "strokeId", undoneStrokeId != null ? undoneStrokeId : ""
         );
+        messagingTemplate.convertAndSend("/topic/room/" + roomId + "/undo", response);
     }
 
     /**
-     * REST API: Trả về toàn bộ nét vẽ đã lưu cho người dùng mới kết nối
+     * REST API: Trả về toàn bộ nét vẽ của một phòng
      */
-    @GetMapping("/api/drawings")
+    @GetMapping("/api/drawings/{roomId}")
     @ResponseBody
-    public List<DrawMessage> getAllDrawings() {
-        return storageService.getAllDrawings();
+    public List<DrawMessage> getRoomDrawings(@PathVariable String roomId) {
+        return storageService.getAllDrawings(roomId);
     }
 }
