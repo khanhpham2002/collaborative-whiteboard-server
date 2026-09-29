@@ -1,7 +1,16 @@
 package com.study.whiteboard.model;
 
-public class DrawMessage {
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "draw_messages")
+public class DrawMessageEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String strokeId;
     private double prevX;
     private double prevY;
     private double currX;
@@ -9,19 +18,23 @@ public class DrawMessage {
     private String color;
     private double lineWidth;
     private String senderId;
-    private String strokeId;
 
-    public DrawMessage() {
+    public DrawMessageEntity() {
     }
 
-    public DrawMessage(double prevX, double prevY, double currX, double currY, String color, double lineWidth, String senderId, String strokeId) {
-        this.prevX = prevX;
-        this.prevY = prevY;
-        this.currX = currX;
-        this.currY = currY;
-        this.color = color;
-        this.lineWidth = lineWidth;
-        this.senderId = senderId;
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getStrokeId() {
+        return strokeId;
+    }
+
+    public void setStrokeId(String strokeId) {
         this.strokeId = strokeId;
     }
 
@@ -79,13 +92,5 @@ public class DrawMessage {
 
     public void setSenderId(String senderId) {
         this.senderId = senderId;
-    }
-
-    public String getStrokeId() {
-        return strokeId;
-    }
-
-    public void setStrokeId(String strokeId) {
-        this.strokeId = strokeId;
     }
 }

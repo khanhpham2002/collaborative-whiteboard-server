@@ -47,6 +47,26 @@ public class WhiteboardController {
     }
 
     /**
+     * Nhận yêu cầu Undo tại '/app/undo'
+     * Xóa nét vẽ cuối cùng của user đó trong DB, và phát thanh ID của nét vẽ đó
+     * để các client tự xóa nó khỏi màn hình.
+     */
+    @MessageMapping("/undo")
+    @SendTo("/topic/undo")
+    public Map<String, String> broadcastUndo(Map<String, String> payload) {
+        String senderId = payload.get("senderId");
+        log.info("Nhận yêu cầu Undo từ user: {}", senderId);
+        
+        String undoneStrokeId = storageService.undoLastStroke(senderId);
+        
+        // Trả về strokeId vừa xóa để các client biết mà xóa khỏi canvas
+        return Map.of(
+            "senderId", senderId,
+            "strokeId", undoneStrokeId != null ? undoneStrokeId : ""
+        );
+    }
+
+    /**
      * REST API: Trả về toàn bộ nét vẽ đã lưu cho người dùng mới kết nối
      */
     @GetMapping("/api/drawings")

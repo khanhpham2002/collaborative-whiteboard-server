@@ -4,3 +4,14 @@ server:
 spring:
   application:
     name: whiteboard-backend
+  datasource:
+    # Mặc định dùng H2 lưu ra file ./data/whiteboard_db.mv.db để không bị mất khi restart server
+    # Trên Render, có thể ghi đè bằng biến môi trường SPRING_DATASOURCE_URL để trỏ tới PostgreSQL
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/whiteboard_db;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
