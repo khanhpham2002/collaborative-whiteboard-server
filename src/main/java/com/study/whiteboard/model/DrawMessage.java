@@ -10,11 +10,12 @@ public class DrawMessage {
     private double lineWidth;
     private String senderId;
     private String strokeId;
+    private String type; // pen, line, rect, circle
 
     public DrawMessage() {
     }
 
-    public DrawMessage(double prevX, double prevY, double currX, double currY, String color, double lineWidth, String senderId, String strokeId) {
+    public DrawMessage(double prevX, double prevY, double currX, double currY, String color, double lineWidth, String senderId, String strokeId, String type) {
         this.prevX = prevX;
         this.prevY = prevY;
         this.currX = currX;
@@ -23,6 +24,7 @@ public class DrawMessage {
         this.lineWidth = lineWidth;
         this.senderId = senderId;
         this.strokeId = strokeId;
+        this.type = type;
     }
 
     public double getPrevX() {
@@ -87,5 +89,13 @@ public class DrawMessage {
 
     public void setStrokeId(String strokeId) {
         this.strokeId = strokeId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

@@ -34,6 +34,7 @@ public class DrawingStorageService {
         entity.setColor(message.getColor());
         entity.setLineWidth(message.getLineWidth());
         entity.setSenderId(message.getSenderId());
+        entity.setType(message.getType());
         
         repository.save(entity);
     }
@@ -52,6 +53,7 @@ public class DrawingStorageService {
             msg.setColor(entity.getColor());
             msg.setLineWidth(entity.getLineWidth());
             msg.setSenderId(entity.getSenderId());
+            msg.setType(entity.getType());
             return msg;
         }).collect(Collectors.toList());
     }

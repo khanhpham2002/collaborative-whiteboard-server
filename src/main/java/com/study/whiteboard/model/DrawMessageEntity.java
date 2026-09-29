@@ -18,6 +18,7 @@ public class DrawMessageEntity {
     private String color;
     private double lineWidth;
     private String senderId;
+    private String type;
 
     public DrawMessageEntity() {
     }
@@ -92,5 +93,13 @@ public class DrawMessageEntity {
 
     public void setSenderId(String senderId) {
         this.senderId = senderId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
